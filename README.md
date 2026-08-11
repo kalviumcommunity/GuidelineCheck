@@ -33,8 +33,8 @@ The corpus is designed to test whether GuidelineCheck can:
 - Shashank Venkatesh
 
 ## Technical Strengths
-Mithun Krishna Arun: Python, Data Processing, Database
-Joe Celester: Python, RAG, Backend Development
+Mithun Krishna Arun: Python, Data Processing, Database    
+Joe Celester: Python, RAG, Backend Development      
 Shashank Venkatesh: Frontend, Python, Data Analysis
 
 ## Working Agreements
