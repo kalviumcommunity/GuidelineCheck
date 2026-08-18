@@ -1,6 +1,6 @@
 # GuidelineCheck — Synthetic Corpus
 
-GuidelineCheck is a college RAG project designed to help public-health field workers quickly find the current and relevant guidance from frequently updated documents.
+GuidelineCheck is a RAG project designed to help public-health field workers quickly find the current and relevant guidance from frequently updated documents.
 
 ## Corpus Contents
 
