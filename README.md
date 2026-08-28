@@ -1,49 +1,28 @@
-# GuidelineCheck — Synthetic Corpus
+# GuidelineCheck Backend
+## Features
+- Ingest documents with rich metadata
+- Chunking and embedding generation using Sentence Transformers
+- Semantic search using ChromaDB, prioritizing "Current" guidelines
+- LLM grounded response generation 
 
-GuidelineCheck is a RAG project designed to help public-health field workers quickly find the current and relevant guidance from frequently updated documents.
+## Setup
+1. Create a virtual environment and activate it:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Copy `.env.example` to `.env` and fill in the required environment variables:
+   ```bash
+   cp .env.example .env
+   ```
+4. Run the application:
+   ```bash
+   uvicorn app.main:app --reload
+   ```
 
-## Corpus Contents
-
-- 40 fictional public-health documents
-- Outbreak guidelines
-- Vaccination protocols
-- Health advisories
-- Field-worker procedures
-- Multiple document versions
-- Current and superseded guidance
-- Publication and effective dates
-- Document metadata
-- RAG evaluation questions
-
-## Purpose
-
-The corpus is designed to test whether GuidelineCheck can:
-
-- Retrieve relevant guidance
-- Identify the latest/current version
-- Distinguish outdated guidance
-- Provide source citations
-- Refuse when the required information is unavailable
-
-# Team Charter — Sprint 2
-
-## Team Members
-- Mithun Krishna Arun (Project Admin)
-- Joe Celester
-- Shashank Venkatesh
-
-## Technical Strengths
-Mithun Krishna Arun: Python, Data Processing, Database    
-Joe Celester: Python, RAG, Backend Development      
-Shashank Venkatesh: Frontend, Python, Data Analysis
-
-## Working Agreements
-- PR review TAT: Within 4 hours during SW block
-- Blocker escalation: Raise in standup immediately
-- Standup format: Yesterday / Today / Blockers (each person)
-
-## Communication
-Primary channel: Google Chat
-
-## What we commit to
-Build a reliable RAG assistant that provides current, source-backed guidance without hallucinating.
+## API Documentation
+Once running, visit `http://127.0.0.1:8000/docs` to interact with the API endpoints.
