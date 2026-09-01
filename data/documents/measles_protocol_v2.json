@@ -1,0 +1,13 @@
+{
+  "document_id": "measles-protocol-v2",
+  "title": "Measles Outbreak Vaccination Protocol",
+  "topic": "Measles",
+  "document_type": "Vaccination Protocol",
+  "version": "2.0",
+  "publication_date": "2026-07-01",
+  "effective_date": "2026-07-05",
+  "status": "Current",
+  "supersedes": "measles-protocol-v1",
+  "region": "National (Synthetic)",
+  "source_url": null
+}

@@ -1,3 +1,52 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pdm-build/
 .venv/
-node_modules/
+venv/
+env/
+ENV/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python packaging / build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# IDE and editor settings
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Node / frontend
+node_modules/
+.next/
+out/
+coverage/
+.npm/
+.eslintcache
+
+# Local runtime data and generated storage
+storage/
+*.sqlite3
+*.db
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db

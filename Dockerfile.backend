@@ -1,0 +1,21 @@
+# Optional Dockerfile for the GuidelineCheck FastAPI backend.
+# Not required to run the project locally — see README.md for the plain
+# Python instructions. Provided for convenience only.
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY backend/requirements.txt /app/backend/requirements.txt
+RUN pip install --no-cache-dir -r /app/backend/requirements.txt
+
+COPY backend /app/backend
+COPY data /app/data
+
+ENV PYTHONPATH=/app/backend
+ENV DOCUMENTS_DIR=/app/data/documents
+ENV CHROMA_PERSIST_DIR=/app/storage/chroma
+
+EXPOSE 8000
+
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "/app/backend"]
