@@ -1,0 +1,19 @@
+# Optional Dockerfile for the GuidelineCheck Streamlit frontend.
+# Not required to run the project locally — see README.md for the plain
+# Python instructions. Provided for convenience only.
+
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY frontend/requirements.txt /app/frontend/requirements.txt
+RUN pip install --no-cache-dir -r /app/frontend/requirements.txt
+
+COPY frontend /app/frontend
+COPY frontend_components /app/frontend_components
+
+ENV GUIDELINECHECK_API_URL=http://backend:8000
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "/app/frontend/app.py", "--server.port=8501", "--server.address=0.0.0.0"]

@@ -1,0 +1,33 @@
+# Optional docker-compose for GuidelineCheck.
+# Not required — see README.md for the plain Python (recommended) instructions.
+# This is a convenience option for running both services together in containers.
+
+version: "3.9"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./storage/chroma:/app/storage/chroma
+      - ./data/documents:/app/data/documents
+    environment:
+      - CORS_ALLOW_ORIGINS=http://localhost:8501
+      - LLM_PROVIDER=none
+    # Note: run ingestion once the container is up, e.g.:
+    #   docker compose exec backend python -c "..."
+    # or call POST /api/v1/ingest via curl/HTTP after startup.
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - GUIDELINECHECK_API_URL=http://backend:8000
+    depends_on:
+      - backend
