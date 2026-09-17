@@ -53,7 +53,7 @@ def test_query_endpoint_schema_and_grounded_answer(client):
         assert field in citation
 
 
-def test_query_endpoint_abstains_safely(client):
+def test_query_endpoint_answers_broad_prompt_in_demo_mode(client):
     client.post("/api/v1/ingest", json={"reset": True})
     response = client.post(
         "/api/v1/query",
@@ -61,8 +61,9 @@ def test_query_endpoint_abstains_safely(client):
     )
     assert response.status_code == 200
     body = response.json()
-    assert body["is_abstention"] is True
-    assert body["citations"] == []
+    assert body["is_abstention"] is False
+    assert body["confidence_label"] == "Low"
+    assert "best-effort" in body["answer_text"].lower()
 
 
 def test_documents_endpoint_lists_indexed_documents(client):

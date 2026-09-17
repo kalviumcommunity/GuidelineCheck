@@ -13,12 +13,13 @@ def ingested_store(settings):
     return settings
 
 
-def test_abstains_on_out_of_corpus_question(ingested_store):
+def test_broad_mode_answers_out_of_corpus_question(ingested_store):
     service = RAGService(ingested_store)
     response = service.answer_query(QueryRequest(question="What guidance exists for an outbreak on Mars?"))
-    assert response.is_abstention is True
-    assert response.citations == []
-    assert "could not find sufficient guidance" in response.answer_text.lower()
+    assert response.is_abstention is False
+    assert response.confidence_label.value == "Low"
+    assert "best-effort" in response.answer_text.lower()
+    assert response.citations
 
 
 def test_abstains_on_patient_specific_question(ingested_store):
@@ -41,6 +42,14 @@ def test_grounded_answer_for_current_measles_question(ingested_store):
     assert len(response.citations) > 0
     assert any(c.status.value == "Current" for c in response.citations)
     assert response.safety_notice
+
+
+def test_broad_vaccine_news_question_gets_current_guidance(ingested_store):
+    service = RAGService(ingested_store)
+    response = service.answer_query(QueryRequest(question="What is the latest news and info about vaccine?"))
+    assert response.is_abstention is False
+    assert response.current_guidance_found is True
+    assert len(response.citations) > 0
 
 
 def test_extractive_fallback_marks_mode_and_still_cites(ingested_store):

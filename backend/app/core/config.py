@@ -51,6 +51,9 @@ class Settings(BaseSettings):
     default_top_k: int = 6
     max_top_k: int = 20
     min_sufficient_similarity: float = 0.30
+    # Temporary demo behavior: answer broad non-patient-specific prompts with
+    # the closest indexed context instead of abstaining on a low score.
+    allow_broad_answers: bool = True
 
     # --- LLM provider (optional) ---
     # If llm_provider is "none" or no api key is configured, the app runs in

@@ -37,6 +37,17 @@ _UNSAFE_PATIENT_SPECIFIC_PATTERN = re.compile(
     re.IGNORECASE,
 )
 
+_GENERAL_GUIDANCE_EXPANSIONS = (
+    (
+        re.compile(r"\b(vaccine|vaccines|vaccination|immunization|immunisation)\b", re.IGNORECASE),
+        "vaccination vaccine immunization measles protocol",
+    ),
+    (
+        re.compile(r"\b(latest|news|update|updates|recent|new)\b", re.IGNORECASE),
+        "current latest effective guidance",
+    ),
+)
+
 # Minimum semantic similarity below which retrieval is considered too weak to trust.
 # Configurable via settings.min_sufficient_similarity (env: MIN_SUFFICIENT_SIMILARITY).
 # The default of 0.30 is calibrated for real dense sentence embeddings
@@ -70,7 +81,7 @@ class RAGService:
             )
 
         result = self.retrieval_service.retrieve_guidance(
-            question=request.question,
+            question=self._retrieval_query(request.question),
             topic=request.topic,
             document_type=request.document_type,
             region=request.region,
@@ -87,13 +98,60 @@ class RAGService:
 
         sufficient = bool(result.chunks) and (top_similarity or 0.0) >= self.settings.min_sufficient_similarity
 
-        if not sufficient:
+        if not sufficient and not self.settings.allow_broad_answers:
             return self._abstain(
                 request,
                 candidates_considered=result.candidates_considered,
                 current_found=current_found,
                 other_found=other_found,
                 used_historical_override=result.used_historical_override,
+            )
+
+        if not sufficient:
+            if result.chunks:
+                answer_text = self._broad_fallback_answer(request.question, result.chunks)
+                citations = [self._to_citation(c) for c in result.chunks]
+                return QueryResponse(
+                    question=request.question,
+                    answer_text=answer_text,
+                    is_abstention=False,
+                    confidence_label=ConfidenceLabel.LOW,
+                    retrieved_context_sufficient=False,
+                    current_guidance_found=current_found > 0,
+                    generation_mode="extractive_fallback",
+                    safety_notice=SAFETY_NOTICE,
+                    citations=citations,
+                    retrieval_diagnostics=RetrievalDiagnostics(
+                        candidates_considered=result.candidates_considered,
+                        candidates_returned=len(result.chunks),
+                        top_similarity_score=top_similarity,
+                        current_candidates_found=current_found,
+                        superseded_or_historical_candidates_found=other_found,
+                        used_historical_override=result.used_historical_override,
+                    ),
+                )
+
+            return QueryResponse(
+                question=request.question,
+                answer_text=(
+                    "I do not have matching temporary data for that question yet. "
+                    "Please add or ingest relevant guidance documents and try again."
+                ),
+                is_abstention=False,
+                confidence_label=ConfidenceLabel.LOW,
+                retrieved_context_sufficient=False,
+                current_guidance_found=False,
+                generation_mode="extractive_fallback",
+                safety_notice=SAFETY_NOTICE,
+                citations=[],
+                retrieval_diagnostics=RetrievalDiagnostics(
+                    candidates_considered=result.candidates_considered,
+                    candidates_returned=0,
+                    top_similarity_score=None,
+                    current_candidates_found=current_found,
+                    superseded_or_historical_candidates_found=other_found,
+                    used_historical_override=result.used_historical_override,
+                ),
             )
 
         # Try LLM generation; fall back to deterministic extractive summary.
@@ -140,6 +198,18 @@ class RAGService:
         )
 
     # -- helpers -----------------------------------------------------------------
+
+    @staticmethod
+    def _retrieval_query(question: str) -> str:
+        """Add corpus terminology to short, general public-health questions."""
+        expansions = [
+            expansion
+            for pattern, expansion in _GENERAL_GUIDANCE_EXPANSIONS
+            if pattern.search(question)
+        ]
+        if not expansions:
+            return question
+        return f"{question} {' '.join(expansions)}"
 
     def _abstain(
         self,
@@ -207,6 +277,19 @@ class RAGService:
                 "requested or is the closest available match."
             )
         return "".join(lines)
+
+    @staticmethod
+    def _broad_fallback_answer(question: str, chunks: list[RetrievedChunk]) -> str:
+        """Answer broad demo prompts using the closest available local context."""
+        answer = RAGService._extractive_answer(question, chunks, any(
+            c.metadata.get("status") == GuidanceStatus.CURRENT.value for c in chunks
+        ))
+        return (
+            "No directly matching guidance was found, so this is a best-effort answer "
+            "from the closest temporary indexed data. Verify it against an official "
+            "public-health source.\n\n"
+            f"{answer}"
+        )
 
     @staticmethod
     def _extractive_confidence(top_similarity: float | None, current_found: int) -> ConfidenceLabel:

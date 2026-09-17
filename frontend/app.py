@@ -245,7 +245,7 @@ with st.sidebar:
 
     st.markdown("---")
 
-    if st.button("📚 View indexed documents", use_container_width=True):
+    if st.button("View indexed documents", icon=":material/library_books:", use_container_width=True):
         st.session_state.show_documents = True
         st.rerun()
 
@@ -280,8 +280,8 @@ with st.sidebar:
 # Document library view
 # ----------------------------------------------------------------------------
 if st.session_state.show_documents:
-    st.markdown("## 📚 Document Library")
-    if st.button("← Back to chat"):
+    st.markdown("## Document Library")
+    if st.button("Back to chat", icon=":material/arrow_back:"):
         st.session_state.show_documents = False
         st.rerun()
 
@@ -297,26 +297,59 @@ if st.session_state.show_documents:
     else:
         by_id = {d["document_id"]: d for d in documents}
         for doc in sorted(documents, key=lambda d: (d["topic"], d["title"], d["version"])):
-            with st.container(border=True):
-                cols = st.columns([3, 1, 1, 1])
-                with cols[0]:
-                    st.markdown(f"**{doc['title']}** — v{doc['version']}")
-                    st.caption(f"{doc['document_type']} · {doc['topic']} · {doc['region']}")
-                with cols[1]:
-                    st.markdown(status_badge_html(doc["status"]), unsafe_allow_html=True)
-                with cols[2]:
-                    st.caption(f"Effective: {doc['effective_date']}")
-                with cols[3]:
-                    st.caption(f"{doc['chunk_count']} chunks")
+            previous = by_id.get(doc.get("supersedes"))
+            next_document = by_id.get(doc.get("superseded_by"))
+            relations = []
+            if doc.get("supersedes"):
+                previous_title = (
+                    f"{previous['title']} v{previous['version']}"
+                    if previous
+                    else doc["supersedes"]
+                )
+                relations.append(f"Supersedes: {previous_title}")
+            if doc.get("superseded_by"):
+                next_title = (
+                    f"{next_document['title']} v{next_document['version']}"
+                    if next_document
+                    else doc["superseded_by"]
+                )
+                relations.append(f"Superseded by: {next_title}")
 
-                if doc.get("supersedes"):
-                    prev = by_id.get(doc["supersedes"])
-                    prev_title = f"{prev['title']} v{prev['version']}" if prev else doc["supersedes"]
-                    st.caption(f"↳ Supersedes: {prev_title}")
-                if doc.get("superseded_by"):
-                    nxt = by_id.get(doc["superseded_by"])
-                    nxt_title = f"{nxt['title']} v{nxt['version']}" if nxt else doc["superseded_by"]
-                    st.caption(f"↳ Superseded by: {nxt_title}")
+            relation_html = "".join(
+                f'<div class="gc-document-relation">{html.escape(relation)}</div>'
+                for relation in relations
+            )
+            st.markdown(
+                f"""
+                <article class="gc-document-card">
+                    <div class="gc-document-card-header">
+                        <div>
+                            <div class="gc-document-title">
+                                {html.escape(doc['title'])}
+                                <span class="gc-document-version">v{html.escape(str(doc['version']))}</span>
+                            </div>
+                            <div class="gc-document-meta">
+                                {html.escape(doc['document_type'])} · {html.escape(doc['topic'])} ·
+                                {html.escape(doc['region'])}
+                            </div>
+                        </div>
+                        {status_badge_html(doc['status'])}
+                    </div>
+                    <div class="gc-document-details">
+                        <div>
+                            <span class="gc-document-detail-label">Effective date</span>
+                            <span class="gc-document-detail-value">{html.escape(doc['effective_date'])}</span>
+                        </div>
+                        <div>
+                            <span class="gc-document-detail-label">Indexed chunks</span>
+                            <span class="gc-document-detail-value">{html.escape(str(doc['chunk_count']))}</span>
+                        </div>
+                    </div>
+                    {relation_html}
+                </article>
+                """,
+                unsafe_allow_html=True,
+            )
     st.stop()
 
 

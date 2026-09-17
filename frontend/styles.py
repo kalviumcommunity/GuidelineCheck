@@ -2,10 +2,10 @@
 from __future__ import annotations
 
 STATUS_COLORS = {
-    "Current": {"bg": "#e6f4ea", "fg": "#1e7a34", "border": "#1e7a34", "icon": "✅"},
-    "Superseded": {"bg": "#fff4e5", "fg": "#9a6300", "border": "#c68400", "icon": "⚠️"},
-    "Historical": {"bg": "#eef0f2", "fg": "#54606b", "border": "#8a97a3", "icon": "🕘"},
-    "Draft": {"bg": "#eef2ff", "fg": "#3949ab", "border": "#3949ab", "icon": "📝"},
+    "Current": {"bg": "#e6f4ea", "fg": "#1e7a34", "border": "#1e7a34", "icon": "●"},
+    "Superseded": {"bg": "#fff4e5", "fg": "#9a6300", "border": "#c68400", "icon": "!"},
+    "Historical": {"bg": "#eef0f2", "fg": "#54606b", "border": "#8a97a3", "icon": "◷"},
+    "Draft": {"bg": "#eef2ff", "fg": "#3949ab", "border": "#3949ab", "icon": "✎"},
 }
 
 CONFIDENCE_COLORS = {
@@ -28,6 +28,22 @@ BASE_CSS = """
 
 .stApp {
     background-color: var(--gc-bg);
+    color: var(--gc-text);
+}
+
+.stApp [data-testid="stMarkdownContainer"] {
+    color: var(--gc-text);
+}
+.stApp [data-testid="stMarkdownContainer"] p,
+.stApp [data-testid="stMarkdownContainer"] span {
+    color: var(--gc-text) !important;
+}
+.stApp [data-testid="stCaptionContainer"] {
+    color: var(--gc-text-muted);
+}
+.stApp [data-testid="stCaptionContainer"] p,
+.stApp [data-testid="stCaptionContainer"] span {
+    color: var(--gc-text-muted) !important;
 }
 
 /* Header / brand */
@@ -160,6 +176,73 @@ BASE_CSS = """
     border: 1px solid #f2d190;
     border-radius: 6px;
     padding: 0.4rem 0.6rem;
+}
+
+/* Indexed document cards */
+.gc-document-card {
+    background: var(--gc-surface);
+    border: 1px solid var(--gc-border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+    margin: 0 0 0.75rem 0;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+.gc-document-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.gc-document-title {
+    color: var(--gc-text);
+    font-size: 1rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+.gc-document-version {
+    color: var(--gc-text-muted);
+    font-weight: 600;
+}
+.gc-document-meta {
+    color: var(--gc-text-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+    margin-top: 0.25rem;
+}
+.gc-document-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem 1rem;
+    border-top: 1px solid var(--gc-border);
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+}
+.gc-document-detail-label {
+    color: var(--gc-text-muted);
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 650;
+    text-transform: uppercase;
+}
+.gc-document-detail-value {
+    color: var(--gc-text);
+    display: block;
+    font-size: 0.85rem;
+    margin-top: 0.1rem;
+}
+.gc-document-relation {
+    border-top: 1px dashed var(--gc-border);
+    color: var(--gc-text-muted);
+    font-size: 0.8rem;
+    margin-top: 0.7rem;
+    padding-top: 0.55rem;
+}
+@media (max-width: 640px) {
+    .gc-document-card-header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.55rem;
+    }
 }
 
 /* Example chips */
